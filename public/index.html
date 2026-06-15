@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>HRAlyze — Dev Board</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap');
+
+/* ══════════════════════════════════════════════
+   TOKENS — DARK
+══════════════════════════════════════════════ */
+:root, [data-theme="dark"] {
+  --bg:        #111318;
+  --sidebar:   #13151c;
+  --panel:     #16181f;
+  --surface:   #1c1f2a;
+  --surface2:  #222637;
+  --surface3:  #282d3f;
+  --border:    #252a3a;
+  --border2:   #2e3450;
+  --border3:   #3a4060;
+
+  --text:      #e8ecf8;
+  --text-2:    #8892b4;
+  --text-3:    #4a526e;
+
+  --indigo:    #6366f1;
+  --indigo-l:  #818cf8;
+  --violet:    #a78bfa;
+  --violet-l:  #c4b5fd;
+
+  --todo:      #5b8def;
+  --prog:      #f0a844;
+  --done:      #3ec97a;
+
+  --shadow-sm: 0 1px 4px rgba(0,0,0,.35);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.45);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,.55);
+
+  --theme-icon: '☀️';
+}
+
+/* ══════════════════════════════════════════════
+   TOKENS — LIGHT
+══════════════════════════════════════════════ */
+[data-theme="light"] {
+  --bg:        #f0f2f7;
+  --sidebar:   #ffffff;
+  --panel:     #ffffff;
+  --surface:   #ffffff;
+  --surface2:  #f5f6fa;
+  --surface3:  #eceef5;
+  --border:    #e2e5f0;
+  --border2:   #d0d4e8;
+  --border3:   #b8bdd6;
+
+  --text:      #1a1d2e;
+  --text-2:    #4a5070;
+  --text-3:    #9096b4;
+
+  --indigo:    #4f52d9;
+  --indigo-l:  #6366f1;
+  --violet:    #7c3aed;
+  --violet-l:  #9d7dea;
+
+  --todo:      #3b74e0;
+  --prog:      #d97706;
+  --done:      #16a34a;
+
+  --shadow-sm: 0 1px 4px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.08);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,.12);
+
+  --theme-icon: '🌙';
+}
+
+/* ══════════════════════════════════════════════
+   BASE
+══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px; line-height: 1.5;
+  transition: background .25s, color .25s;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+/* ══════════════════════════════════════════════
+   LAYOUT
+══════════════════════════════════════════════ */
+.app { display: flex; height: 100vh; }
+
+/* ══════════════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════════════ */
+.sidebar {
+  width: 228px; flex-shrink: 0;
+  background: var(--sidebar);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  transition: background .25s;
+}
+
+.sidebar-brand {
+  padding: 18px 16px 15px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 11px;
+}
+.brand-icon {
+  width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px;
+  box-shadow: 0 0 0 1px rgba(99,102,241,.3), 0 4px 12px rgba(79,70,229,.25);
+}
+.brand-name { font-size: 15px; font-weight: 700; letter-spacing: -.4px; color: var(--text); }
+.brand-sub  { font-size: 10px; color: var(--text-3); font-weight: 500; letter-spacing: .5px; text-transform: uppercase; }
+
+.sidebar-section { padding: 16px 10px 8px; }
+.sidebar-label {
+  font-size: 10px; font-weight: 600; letter-spacing: .7px; text-transform: uppercase;
+  color: var(--text-3); padding: 0 8px; margin-bottom: 5px;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px; border-radius: 9px;
+  font-size: 13px; font-weight: 500; color: var(--text-2);
+  cursor: pointer; border: none; background: transparent;
+  width: 100%; text-align: left;
+  transition: background .12s, color .12s;
+  position: relative;
+}
+.nav-item:hover { background: var(--surface3); color: var(--text); }
+.nav-item.active { background: var(--surface2); color: var(--text); font-weight: 600; }
+.nav-item.active::before {
+  content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px;
+  background: var(--indigo); border-radius: 0 3px 3px 0;
+}
+.nav-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.nav-count {
+  margin-left: auto; font-size: 10px; font-weight: 700;
+  background: var(--surface3); color: var(--text-3);
+  padding: 1px 7px; border-radius: 99px; min-width: 22px; text-align: center;
+  transition: background .15s, color .15s;
+}
+.nav-count.lit { background: rgba(99,102,241,.12); color: var(--indigo-l); }
+
+.sidebar-bottom {
+  margin-top: auto; padding: 12px 10px;
+  border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.sync-card {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 10px; border-radius: 10px;
+  background: var(--surface2); border: 1px solid var(--border);
+}
+.sync-live { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--done); box-shadow: 0 0 7px var(--done); flex-shrink: 0;
+}
+.sync-label { font-size: 11.5px; font-weight: 600; color: var(--text); }
+.sync-time  { font-size: 11px; color: var(--text-3); }
+.btn-icon {
+  width: 28px; height: 28px; border-radius: 7px;
+  border: 1px solid var(--border2); background: var(--surface);
+  color: var(--text-2); cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .12s; font-size: 13px;
+}
+.btn-icon:hover { border-color: var(--indigo); color: var(--indigo-l); background: rgba(99,102,241,.07); }
+.btn-icon svg { width: 13px; height: 13px; }
+
+.theme-btn {
+  width: 100%; padding: 8px 10px; border-radius: 9px;
+  border: 1px solid var(--border2); background: var(--surface);
+  color: var(--text-2); cursor: pointer; font-size: 12px; font-weight: 500;
+  display: flex; align-items: center; gap: 8px;
+  transition: all .12s;
+}
+.theme-btn:hover { background: var(--surface2); color: var(--text); }
+
+/* ══════════════════════════════════════════════
+   MAIN
+══════════════════════════════════════════════ */
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
+
+/* TOPBAR */
+.topbar {
+  height: 54px; flex-shrink: 0;
+  display: flex; align-items: center; padding: 0 24px; gap: 12px;
+  background: var(--panel); border-bottom: 1px solid var(--border);
+  transition: background .25s;
+}
+.page-title { font-size: 16px; font-weight: 700; letter-spacing: -.35px; color: var(--text); }
+.page-sub   { font-size: 12px; color: var(--text-3); font-weight: 400; }
+.topbar-div { width: 1px; height: 18px; background: var(--border); }
+.topbar-spacer { flex: 1; }
+
+/* STATS */
+.stats-row {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 12px; padding: 16px 20px;
+  background: var(--panel); border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  transition: background .25s;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px 16px;
+  transition: background .25s, border-color .25s;
+}
+.stat-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+.stat-label { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .5px; }
+.stat-icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.stat-value { font-size: 28px; font-weight: 700; letter-spacing: -.5px; line-height: 1; margin-bottom: 4px; }
+.stat-sub   { font-size: 11px; color: var(--text-3); }
+.stat-prog  { height: 3px; background: var(--surface3); border-radius: 99px; margin-top: 12px; overflow: hidden; }
+.stat-prog-fill { height: 100%; border-radius: 99px; transition: width .6s cubic-bezier(0.16,1,0.3,1); }
+
+/* BOARD */
+.board-area {
+  flex: 1; overflow: hidden;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 16px; padding: 16px 20px;
+  background: var(--bg);
+  transition: background .25s;
+}
+
+/* COLUMN */
+.col {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  transition: background .25s, border-color .25s;
+}
+.col-head {
+  padding: 14px 18px 12px;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.col-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.col-title { font-weight: 700; font-size: 13px; letter-spacing: -.2px; flex: 1; color: var(--text); }
+.col-pill {
+  font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 99px;
+  background: var(--surface2); color: var(--text-2);
+  border: 1px solid var(--border2);
+}
+
+.col-body {
+  flex: 1; overflow-y: auto;
+  padding: 12px 14px; display: flex; flex-direction: column; gap: 10px;
+  transition: background .15s;
+}
+.col-body.over { background: color-mix(in srgb, var(--indigo) 4%, var(--panel)); }
+
+/* PAGINATION */
+.col-pager {
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--panel);
+}
+.pager-info { font-size: 11px; color: var(--text-3); font-weight: 500; }
+.pager-btns { display: flex; gap: 4px; }
+.pager-btn {
+  width: 28px; height: 28px; border-radius: 7px;
+  border: 1px solid var(--border2); background: var(--surface);
+  color: var(--text-2); cursor: pointer; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .12s;
+}
+.pager-btn:hover:not(:disabled) { border-color: var(--indigo); color: var(--indigo-l); background: rgba(99,102,241,.07); }
+.pager-btn:disabled { opacity: .3; cursor: default; }
+.pager-pages { display: flex; gap: 3px; }
+.pager-page {
+  min-width: 28px; height: 28px; padding: 0 6px; border-radius: 7px;
+  border: 1px solid transparent; background: transparent;
+  color: var(--text-3); cursor: pointer; font-size: 11px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .12s;
+}
+.pager-page:hover { background: var(--surface); color: var(--text-2); }
+.pager-page.active { border-color: var(--indigo); color: var(--indigo-l); background: rgba(99,102,241,.08); }
+
+/* ══════════════════════════════════════════════
+   CARD
+══════════════════════════════════════════════ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+  cursor: grab;
+  transition: box-shadow .2s, transform .2s cubic-bezier(0.16,1,0.3,1), border-color .15s, background .25s;
+  position: relative;
+}
+.card-stripe {
+  height: 3px;
+  background: linear-gradient(90deg, var(--mod-color, var(--indigo)) 0%, color-mix(in srgb, var(--mod-color, var(--indigo)) 30%, transparent) 100%);
+}
+.card-body { padding: 13px 15px; }
+.card:hover {
+  border-color: var(--border3);
+  box-shadow: var(--shadow-md), 0 0 0 1px var(--border2);
+  transform: translateY(-2px);
+}
+.card.dragging { opacity: .3; cursor: grabbing; transform: scale(.96); }
+
+.card-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 9px; }
+.mod-tag {
+  font-size: 9.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 6px;
+  background: color-mix(in srgb, var(--mod-color, var(--indigo)) 10%, transparent);
+  color: var(--mod-color, var(--indigo));
+  border: 1px solid color-mix(in srgb, var(--mod-color, var(--indigo)) 20%, transparent);
+}
+.age-tag {
+  font-size: 10px; font-weight: 600;
+  padding: 2px 7px; border-radius: 6px;
+}
+.age-fresh { background: rgba(61,201,122,.1); color: #22c55e; border: 1px solid rgba(61,201,122,.2); }
+.age-warn  { background: rgba(240,168,68,.1); color: #f59e0b; border: 1px solid rgba(240,168,68,.2); }
+.age-old   { background: rgba(239,68,68,.1);  color: #ef4444; border: 1px solid rgba(239,68,68,.2); }
+.age-stale { background: rgba(239,68,68,.15); color: #dc2626; border: 1px solid rgba(239,68,68,.3); font-weight: 700; }
+.card-no   { margin-left: auto; font-size: 11px; color: var(--text-3); font-weight: 600; }
+
+.card-text {
+  font-size: 13px; color: var(--text-2); line-height: 1.6;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  height: calc(13px * 1.6 * 2);
+}
+.card:hover .card-text {
+  -webkit-line-clamp: 3;
+  height: calc(13px * 1.6 * 3);
+}
+.feature-doc-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin-top: 7px;
+  font-size: 10px; font-weight: 600;
+  padding: 2px 8px; border-radius: 6px;
+  background: rgba(99,102,241,.12);
+  color: var(--indigo-l);
+  border: 1px solid rgba(99,102,241,.2);
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  text-transform: capitalize;
+}
+
+/* card actions — slide in on hover */
+.card-actions {
+  max-height: 0; overflow: hidden; opacity: 0;
+  transition: max-height .22s cubic-bezier(0.16,1,0.3,1), opacity .15s;
+}
+.card:hover .card-actions { max-height: 80px; opacity: 1; }
+.card-actions-inner {
+  display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+  padding: 9px 15px 13px;
+  border-top: 1px solid var(--border);
+}
+
+.btn-act {
+  height: 27px; padding: 0 12px; border-radius: 7px;
+  font-size: 11.5px; font-weight: 600;
+  cursor: pointer; border: 1px solid var(--border2);
+  background: var(--surface2); color: var(--text-2);
+  display: inline-flex; align-items: center; gap: 5px;
+  transition: all .12s; white-space: nowrap;
+}
+.btn-act:hover { border-color: var(--indigo); color: var(--indigo-l); background: rgba(99,102,241,.07); }
+.btn-act.claude {
+  border-color: color-mix(in srgb, var(--violet) 35%, transparent);
+  color: var(--violet); background: color-mix(in srgb, var(--violet) 7%, transparent);
+}
+.btn-act.claude:hover {
+  border-color: var(--violet); color: var(--violet-l);
+  background: color-mix(in srgb, var(--violet) 13%, transparent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--violet) 18%, transparent);
+}
+.btn-act.back { color: var(--text-3); }
+.btn-act.del { margin-left: auto; color: var(--text-3); }
+.btn-act.del:hover { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,.06); }
+
+/* ── CARD TOOLTIP ────────────────────────────────────────── */
+.card-tooltip {
+  position: fixed;
+  z-index: 500;
+  max-width: 360px; min-width: 260px;
+  background: var(--surface2);
+  border: 1px solid var(--border3);
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: var(--shadow-lg), 0 0 0 1px var(--border2);
+  pointer-events: none;
+  opacity: 0; transform: translateY(4px) scale(.98);
+  transition: opacity .15s, transform .15s cubic-bezier(0.16,1,0.3,1);
+}
+.card-tooltip.visible { opacity: 1; transform: none; }
+.card-tooltip-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.card-tooltip-text {
+  font-size: 12.5px; color: var(--text-2); line-height: 1.65;
+  white-space: pre-wrap; word-break: break-word;
+}
+.card-tooltip-arrow {
+  position: absolute; top: -5px; left: 20px;
+  width: 10px; height: 10px;
+  background: var(--surface2);
+  border-left: 1px solid var(--border3);
+  border-top: 1px solid var(--border3);
+  transform: rotate(45deg);
+}
+
+/* EMPTY */
+.empty {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 8px; color: var(--text-3); font-size: 12px;
+  pointer-events: none; user-select: none; padding: 40px;
+}
+.empty svg { opacity: .2; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--surface2); border: 1px solid var(--border3);
+  padding: 11px 20px; border-radius: 10px;
+  font-size: 12px; font-weight: 500; color: var(--text);
+  box-shadow: var(--shadow-lg);
+  opacity: 0; transition: all .2s cubic-bezier(0.16,1,0.3,1);
+  pointer-events: none; z-index: 999;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinning { animation: spin .65s linear infinite; display: inline-block; }
+
+/* ══════════════════════════════════════════════
+   PLAN MODAL
+══════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 800;
+  background: rgba(0,0,0,.55); backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.plan-modal {
+  width: 680px; max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 48px);
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg), 0 0 0 1px var(--border);
+  display: flex; flex-direction: column;
+  transform: translateY(12px) scale(.98);
+  transition: transform .2s cubic-bezier(0.16,1,0.3,1);
+}
+.modal-overlay.open .plan-modal { transform: none; }
+
+.modal-head {
+  padding: 18px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; gap: 12px; flex-shrink: 0;
+}
+.modal-head-info { flex: 1; min-width: 0; }
+.modal-head-title {
+  font-size: 15px; font-weight: 700; letter-spacing: -.3px;
+  color: var(--text); margin-bottom: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.modal-head-meta { display: flex; align-items: center; gap: 6px; }
+.modal-close {
+  width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+  border: 1px solid var(--border2); background: var(--surface);
+  color: var(--text-3); cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .12s;
+}
+.modal-close:hover { border-color: var(--border3); color: var(--text); background: var(--surface2); }
+
+.modal-body { flex: 1; overflow-y: auto; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+.plan-view { display: flex; flex-direction: column; gap: 12px; }
+.plan-content-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 13px; line-height: 1.75;
+  color: var(--text-2);
+  white-space: pre-wrap; word-break: break-word;
+  min-height: 80px;
+}
+.plan-dates { font-size: 11px; color: var(--text-3); display: flex; gap: 14px; }
+
+.plan-edit { display: flex; flex-direction: column; gap: 10px; }
+.plan-textarea {
+  width: 100%; min-height: 280px; resize: vertical;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 13px; line-height: 1.75;
+  color: var(--text);
+  font-family: inherit;
+  outline: none;
+  transition: border-color .15s;
+}
+.plan-textarea:focus { border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(99,102,241,.12); }
+.plan-textarea::placeholder { color: var(--text-3); }
+
+.plan-hint { font-size: 11px; color: var(--text-3); line-height: 1.5; }
+
+.modal-foot {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+}
+.btn-primary {
+  height: 34px; padding: 0 18px; border-radius: 9px;
+  background: var(--indigo); color: #fff;
+  border: none; font-size: 13px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 6px;
+  transition: opacity .12s, transform .1s;
+}
+.btn-primary:hover { opacity: .88; }
+.btn-primary:active { transform: scale(.97); }
+.btn-primary:disabled { opacity: .4; cursor: default; }
+.btn-secondary {
+  height: 34px; padding: 0 14px; border-radius: 9px;
+  background: var(--surface2); color: var(--text-2);
+  border: 1px solid var(--border2); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all .12s;
+}
+.btn-secondary:hover { background: var(--surface3); color: var(--text); }
+.modal-foot-spacer { flex: 1; }
+.btn-danger {
+  height: 34px; padding: 0 14px; border-radius: 9px;
+  background: transparent; color: var(--text-3);
+  border: 1px solid var(--border2); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all .12s;
+}
+.btn-danger:hover { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,.06); }
+
+/* card images */
+.card-images {
+  display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px;
+}
+.card-thumb {
+  position: relative; width: 38px; height: 38px; border-radius: 5px;
+  overflow: hidden; cursor: pointer; flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.card-thumb .thumb-del {
+  display: none; position: absolute; inset: 0;
+  background: rgba(0,0,0,.55); color: #fff; border: none;
+  font-size: 12px; cursor: pointer; align-items: center; justify-content: center;
+}
+.card-thumb:hover .thumb-del { display: flex; }
+.card-img-drop {
+  width: 38px; height: 38px; border-radius: 5px; border: 1.5px dashed var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer; color: var(--text-3); flex-shrink: 0;
+  transition: border-color .15s, background .15s;
+}
+.card-img-drop:hover, .card-img-drop.drag-over {
+  border-color: var(--violet); background: rgba(167,139,250,.07);
+}
+/* lightbox */
+.lightbox {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,.85); align-items: center; justify-content: center;
+}
+.lightbox.open { display: flex; }
+.lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
+.lightbox-close {
+  position: absolute; top: 18px; right: 24px; font-size: 28px;
+  color: #fff; cursor: pointer; background: none; border: none;
+}
+
+/* plan badge on card */
+.plan-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin-top: 7px;
+  font-size: 10px; font-weight: 600;
+  padding: 2px 8px; border-radius: 6px;
+  background: rgba(167,139,250,.12);
+  color: var(--violet);
+  border: 1px solid rgba(167,139,250,.22);
+}
+</style>
+</head>
+<body>
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightboxImg" src="" alt="">
+</div>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">🗂</div>
+      <div>
+        <div class="brand-name">HRAlyze</div>
+        <div class="brand-sub">Dev Board</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Modüller</div>
+      <div id="navItems">
+        <button class="nav-item active" data-mod="" onclick="setModule('')">
+          <span class="nav-dot" style="background:var(--text-3)"></span>
+          Tümü
+          <span class="nav-count" id="nc-all">0</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="sync-card">
+        <div class="sync-live">
+          <div class="live-dot"></div>
+          <span class="sync-label">Live</span>
+          <span class="sync-time" id="syncTs">—</span>
+        </div>
+        <button class="btn-icon" id="syncBtn" onclick="triggerSync()" title="Sync">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M13.5 8a5.5 5.5 0 1 1-1.1-3.3M13.5 2v3h-3"/>
+          </svg>
+        </button>
+      </div>
+
+      <button class="theme-btn" onclick="toggleTheme()">
+        <span id="themeIcon">☀️</span>
+        <span id="themeLabel">Light Mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <header class="topbar">
+      <span class="page-title" id="pageTitle">Tüm Görevler</span>
+      <div class="topbar-div"></div>
+      <span class="page-sub" id="pageSub">tüm modüller</span>
+      <div class="topbar-spacer"></div>
+    </header>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-label">Toplam</div>
+          <div class="stat-icon" style="background:rgba(99,102,241,.1)">📋</div>
+        </div>
+        <div class="stat-value" id="st-total" style="color:var(--text)">0</div>
+        <div class="stat-sub">aktif görev</div>
+        <div class="stat-prog"><div class="stat-prog-fill" style="width:100%;background:var(--border3)"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-label">Backlog</div>
+          <div class="stat-icon" style="background:rgba(91,141,239,.1)">⏳</div>
+        </div>
+        <div class="stat-value" id="st-todo" style="color:var(--todo)">0</div>
+        <div class="stat-sub">başlanmadı</div>
+        <div class="stat-prog"><div class="stat-prog-fill" id="pb-todo" style="width:0%;background:var(--todo)"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-label">In Progress</div>
+          <div class="stat-icon" style="background:rgba(240,168,68,.1)">🔄</div>
+        </div>
+        <div class="stat-value" id="st-prog" style="color:var(--prog)">0</div>
+        <div class="stat-sub">devam ediyor</div>
+        <div class="stat-prog"><div class="stat-prog-fill" id="pb-prog" style="width:0%;background:var(--prog)"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-label">Tamamlanan</div>
+          <div class="stat-icon" style="background:rgba(62,201,122,.1)">✅</div>
+        </div>
+        <div class="stat-value" id="st-done" style="color:var(--done)">0</div>
+        <div class="stat-sub">done</div>
+        <div class="stat-prog"><div class="stat-prog-fill" id="pb-done" style="width:0%;background:var(--done)"></div></div>
+      </div>
+    </div>
+
+    <!-- BOARD -->
+    <div class="board-area">
+      <div class="col">
+        <div class="col-head">
+          <div class="col-dot" style="background:var(--todo)"></div>
+          <span class="col-title">Backlog</span>
+          <span class="col-pill" id="cnt-todo">0</span>
+        </div>
+        <div class="col-body" id="body-todo"
+          ondragover="onOver(event,'todo')"
+          ondragleave="onLeave(event)"
+          ondrop="onDrop(event,'todo')">
+        </div>
+        <div class="col-pager" id="pager-todo"></div>
+      </div>
+
+      <div class="col">
+        <div class="col-head">
+          <div class="col-dot" style="background:var(--prog)"></div>
+          <span class="col-title">In Progress</span>
+          <span class="col-pill" id="cnt-in_progress">0</span>
+        </div>
+        <div class="col-body" id="body-in_progress"
+          ondragover="onOver(event,'in_progress')"
+          ondragleave="onLeave(event)"
+          ondrop="onDrop(event,'in_progress')">
+        </div>
+        <div class="col-pager" id="pager-in_progress"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PLAN MODAL -->
+<div class="modal-overlay" id="planOverlay" onclick="closePlanModal(event)">
+  <div class="plan-modal">
+    <div class="modal-head">
+      <div class="modal-head-info">
+        <div class="modal-head-title" id="pmTitle">—</div>
+        <div class="modal-head-meta" id="pmMeta"></div>
+      </div>
+      <button class="modal-close" onclick="closePlanModal()">✕</button>
+    </div>
+    <div class="modal-body" id="pmBody">
+      <!-- view veya edit modu buraya render edilir -->
+    </div>
+    <div class="modal-foot" id="pmFoot"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="card-tooltip" id="cardTooltip">
+  <div class="card-tooltip-arrow"></div>
+  <div class="card-tooltip-meta" id="ttMeta"></div>
+  <div class="card-tooltip-text" id="ttText"></div>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const MOD_COLORS = {
+  HRBudget:'#6366f1', HRSmartOnboarding:'#f97316', OrgChart:'#10b981', Survey:'#ec4899',
+  IntegrationHealth:'#06b6d4', SAPIntegration:'#f59e0b', SFIntegration:'#84cc16'
+};
+
+let allTasks=[], activeModule='', dragId=null;
+const PAGE_SIZE = 3;
+const pages = { todo: 0, in_progress: 0 };
+const planCache = {}; // task_id → plan object veya false
+const generatingPlans = new Set(); // plan üretilmekte olan task_id'ler
+const imageCache = {}; // task_id → image[] veya undefined
+
+// ── THEME ──────────────────────────────────────────────────
+const savedTheme = localStorage.getItem('theme') || 'dark';
+setTheme(savedTheme);
+
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('theme', t);
+  document.getElementById('themeIcon').textContent  = t==='dark' ? '☀️' : '🌙';
+  document.getElementById('themeLabel').textContent = t==='dark' ? 'Light Mode' : 'Dark Mode';
+}
+function toggleTheme() {
+  setTheme(document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark');
+}
+
+// ── SOCKET.IO ──────────────────────────────────────────────
+const socket = io();
+socket.on('task:updated', u => {
+  const i = allTasks.findIndex(t=>t.id===u.id);
+  if (i!==-1) allTasks[i]=u; else allTasks.push(u);
+  renderAll();
+});
+socket.on('sync:done', ({added,updated}) => {
+  loadTasks(); loadModules();
+  toast(`🔄 Sync: ${added} yeni, ${updated} güncellendi`);
+});
+socket.on('plan:updated', ({taskId, plan}) => {
+  if (plan) planCache[taskId] = plan;
+  else delete planCache[taskId];
+  generatingPlans.delete(taskId);
+  const task = allTasks.find(t=>t.id===taskId);
+  if (!task) return;
+  const el = document.querySelector(`.card[data-id="${taskId}"]`);
+  if (el) el.replaceWith(makeCard(task));
+});
+socket.on('images:updated', async ({taskId}) => {
+  imageCache[taskId] = await api.get(`/api/tasks/${encodeURIComponent(taskId)}/images`);
+  const task = allTasks.find(t=>t.id===taskId);
+  if (!task) return;
+  const el = document.querySelector(`.card[data-id="${taskId}"]`);
+  if (el) el.replaceWith(makeCard(task));
+});
+socket.on('plan:generating', ({taskId}) => {
+  generatingPlans.add(taskId);
+  const el = document.querySelector(`.card[data-id="${taskId}"]`);
+  const btn = el && el.querySelector('.btn-plan-gen');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Üretiliyor...'; }
+});
+
+// ── API ────────────────────────────────────────────────────
+const api = {
+  get:   u    => fetch(u).then(r=>r.json()),
+  post:  (u,b)=> fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.json()),
+  patch: (id,b)=> fetch(`/api/tasks/${encodeURIComponent(id)}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.json()),
+  del:   id   => fetch(`/api/tasks/${encodeURIComponent(id)}`,{method:'DELETE'}),
+};
+
+(async()=>{
+  await Promise.all([loadModules(), loadTasks()]);
+  const log = await api.get('/api/sync/log');
+  if (log.length) setTs(log[0].synced_at+'Z');
+})();
+
+async function loadModules() {
+  const mods = await api.get('/api/modules');
+  const nav = document.getElementById('navItems');
+  nav.querySelectorAll('[data-mod]:not([data-mod=""])').forEach(e=>e.remove());
+  mods.forEach(m => {
+    const c = MOD_COLORS[m]||'#94a3b8';
+    const b = document.createElement('button');
+    b.className='nav-item'; b.dataset.mod=m;
+    b.innerHTML=`<span class="nav-dot" style="background:${c}"></span>${m}<span class="nav-count" id="nc-${m}">0</span>`;
+    b.onclick=()=>setModule(m);
+    nav.appendChild(b);
+  });
+  updateCounts();
+}
+
+function setModule(m) {
+  activeModule=m;
+  pages.todo=0; pages.in_progress=0;
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.mod===m));
+  document.getElementById('pageTitle').textContent = m || 'Tüm Görevler';
+  document.getElementById('pageSub').textContent   = m || 'tüm modüller';
+  renderAll();
+}
+
+async function loadTasks() {
+  allTasks = await api.get('/api/tasks');
+  await prefetchPlans(allTasks);
+  renderAll();
+}
+
+function renderAll() { renderBoard(); updateStats(); updateCounts(); }
+
+function updateCounts() {
+  const active = allTasks.filter(t=>t.status!=='done');
+  const total  = active.length;
+  const el = document.getElementById('nc-all');
+  if (el) { el.textContent=total; el.className='nav-count'+(total?' lit':''); }
+  const byMod = {};
+  active.forEach(t=>{ byMod[t.module]=(byMod[t.module]||0)+1; });
+  Object.entries(byMod).forEach(([m,c])=>{
+    const e=document.getElementById(`nc-${m}`);
+    if(e){ e.textContent=c; e.className='nav-count'+(c?' lit':''); }
+  });
+}
+
+function updateStats() {
+  const f = activeModule ? allTasks.filter(t=>t.module===activeModule) : allTasks;
+  const todo=f.filter(t=>t.status==='todo').length;
+  const prog=f.filter(t=>t.status==='in_progress').length;
+  const done=f.filter(t=>t.status==='done').length;
+  const active=todo+prog, total=active+done;
+  document.getElementById('st-total').textContent=active;
+  document.getElementById('st-todo').textContent=todo;
+  document.getElementById('st-prog').textContent=prog;
+  document.getElementById('st-done').textContent=done;
+  const pct=v=>total?Math.round(v/total*100)+'%':'0%';
+  document.getElementById('pb-todo').style.width=pct(todo);
+  document.getElementById('pb-prog').style.width=pct(prog);
+  document.getElementById('pb-done').style.width=pct(done);
+}
+
+function renderBoard() {
+  const vis=(activeModule?allTasks.filter(t=>t.module===activeModule):allTasks).filter(t=>t.status!=='done');
+  const cols={todo:[],in_progress:[]};
+  vis.forEach(t=>{if(cols[t.status])cols[t.status].push(t);});
+  ['todo','in_progress'].forEach(s=>{
+    const all=cols[s];
+    const total=all.length;
+    const totalPages=Math.max(1,Math.ceil(total/PAGE_SIZE));
+    // sayfayı sınırla
+    if(pages[s]>=totalPages) pages[s]=Math.max(0,totalPages-1);
+    const page=pages[s];
+    const sliced=all.slice(page*PAGE_SIZE, page*PAGE_SIZE+PAGE_SIZE);
+
+    document.getElementById(`cnt-${s}`).textContent=total;
+    const body=document.getElementById(`body-${s}`);
+    body.innerHTML='';
+    if(!total){
+      body.innerHTML=`<div class="empty"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg><span>Görev yok</span></div>`;
+    } else {
+      sliced.forEach(t=>body.appendChild(makeCard(t)));
+    }
+
+    // pager
+    const pager=document.getElementById(`pager-${s}`);
+    if(totalPages<=1){ pager.innerHTML=''; pager.style.display='none'; return; }
+    pager.style.display='flex';
+    const start=page*PAGE_SIZE+1, end=Math.min((page+1)*PAGE_SIZE,total);
+
+    // max 5 sayfa butonu göster
+    let pageButtons='';
+    const maxBtns=5, half=Math.floor(maxBtns/2);
+    let from=Math.max(0,page-half), to=Math.min(totalPages-1,from+maxBtns-1);
+    if(to-from<maxBtns-1) from=Math.max(0,to-maxBtns+1);
+    for(let i=from;i<=to;i++){
+      pageButtons+=`<button class="pager-page${i===page?' active':''}" onclick="goPage('${s}',${i})">${i+1}</button>`;
+    }
+
+    pager.innerHTML=`
+      <span class="pager-info">${start}–${end} / ${total}</span>
+      <div class="pager-btns">
+        <button class="pager-btn" onclick="goPage('${s}',${page-1})" ${page===0?'disabled':''}">‹</button>
+        <div class="pager-pages">${pageButtons}</div>
+        <button class="pager-btn" onclick="goPage('${s}',${page+1})" ${page===totalPages-1?'disabled':''}">›</button>
+      </div>`;
+  });
+}
+
+function goPage(col, p) {
+  pages[col] = p;
+  renderBoard();
+}
+
+function extractFeatureDoc(desc) {
+  const m = desc.match(/bkz\.\s*`?docs\/features\/([\w\-\.]+\.md)`?/i);
+  if (!m) return null;
+  // Dosya adından okunabilir etiket üret: ai-butce-analisti-code-interpreter.md → ai-butce-analisti
+  return m[1].replace(/\.md$/i, '').replace(/-code-interpreter$/, '').replace(/-/g, ' ');
+}
+
+function makeCard(t) {
+  const color=MOD_COLORS[t.module]||'#6366f1';
+  const long=t.description.length>150;
+  const sid=CSS.escape(t.id);
+  const age=taskAge(t.created_at);
+  const featureDoc=extractFeatureDoc(t.description);
+  const el=document.createElement('div');
+  el.className='card'; el.dataset.id=t.id; el.draggable=true;
+  el.style.setProperty('--mod-color',color);
+  const hasPlan = !!planCache[t.id];
+  const isGenerating = generatingPlans.has(t.id);
+  const images = imageCache[t.id] || [];
+  el.innerHTML=`
+    <div class="card-stripe"></div>
+    <div class="card-body">
+      <div class="card-meta">
+        <span class="mod-tag">${t.module}</span>
+        <span class="age-tag ${age.cls}" title="${age.title}">${age.label}</span>
+        ${hasPlan ? `<div class="plan-badge">📋 Plan var</div>` : ''}
+        <span class="card-no">${t.task_no}</span>
+      </div>
+      <div class="card-text">${esc(t.description)}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${featureDoc ? `<div class="feature-doc-tag" title="İlgili feature dokümanı">📄 ${esc(featureDoc)}</div>` : ''}
+      </div>
+      <div class="card-images">
+        ${images.map(img=>`
+          <div class="card-thumb" onclick="openLightbox('/uploads/${img.filename}')">
+            <img src="/uploads/${img.filename}" alt="">
+            <button class="thumb-del" onclick="event.stopPropagation();deleteImage('${t.id}',${img.id})">✕</button>
+          </div>`).join('')}
+        <div class="card-img-drop" title="Resim ekle (tıkla veya sürükle)"
+          onclick="triggerImageUpload('${t.id}')"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="handleImageDrop(event,'${t.id}')">+</div>
+      </div>
+    </div>
+    <div class="card-actions">
+      <div class="card-actions-inner">
+        ${t.status==='todo'?`<button class="btn-act claude" onclick="copyPrompt('${t.id}')">✦ Claude Prompt</button>`:''}
+        ${t.status==='in_progress'?`<button class="btn-act back" onclick="moveTo('${t.id}','todo')">↩ Geri Al</button>`:''}
+        ${hasPlan
+          ? `<button class="btn-act" onclick="openPlanModal('${t.id}')">📋 Planı Gör</button>`
+          : isGenerating
+            ? `<button class="btn-act btn-plan-gen" disabled>⏳ Üretiliyor...</button>`
+            : `<button class="btn-act" onclick="openPlanModal('${t.id}')">📋 Plan Ekle</button>
+               <button class="btn-act btn-plan-gen" onclick="generatePlan('${t.id}')">✦ Plan Oluştur</button>`
+        }
+        <button class="btn-act del" onclick="delTask('${t.id}')">Sil</button>
+      </div>
+    </div>`;
+
+  el.addEventListener('dragstart',e=>{dragId=t.id;setTimeout(()=>el.classList.add('dragging'),0);e.dataTransfer.effectAllowed='move';});
+  el.addEventListener('dragend',()=>{el.classList.remove('dragging');dragId=null; hideTooltip();});
+  el.addEventListener('mouseenter', ev => showTooltip(ev, t));
+  el.addEventListener('mousemove',  ev => posTooltip(ev));
+  el.addEventListener('mouseleave', hideTooltip);
+  return el;
+}
+
+// ── TOOLTIP ───────────────────────────────────────────────
+const tt = document.getElementById('cardTooltip');
+const ttMeta = document.getElementById('ttMeta');
+const ttText = document.getElementById('ttText');
+let ttTimer;
+
+function showTooltip(ev, t) {
+  clearTimeout(ttTimer);
+  const color = MOD_COLORS[t.module] || '#6366f1';
+  const age = taskAge(t.created_at);
+  const featureDoc = extractFeatureDoc(t.description);
+  ttMeta.innerHTML = `
+    <span class="mod-tag" style="--mod-color:${color}">${t.module}</span>
+    <span class="age-tag ${age.cls}">${age.label}</span>
+    <span style="margin-left:auto;font-size:11px;color:var(--text-3);font-weight:600">${t.task_no}</span>
+    ${featureDoc ? `<span class="feature-doc-tag" style="margin-left:6px">📄 ${esc(featureDoc)}</span>` : ''}`;
+  ttText.textContent = t.description;
+  posTooltip(ev);
+  ttTimer = setTimeout(() => tt.classList.add('visible'), 300);
+}
+
+function posTooltip(ev) {
+  const margin = 12;
+  const tw = 360, th = tt.offsetHeight || 160;
+  let x = ev.clientX + margin;
+  let y = ev.clientY + margin;
+  if (x + tw > window.innerWidth  - margin) x = ev.clientX - tw - margin;
+  if (y + th > window.innerHeight - margin) y = ev.clientY - th - margin;
+  tt.style.left = x + 'px';
+  tt.style.top  = y + 'px';
+}
+
+function hideTooltip() {
+  clearTimeout(ttTimer);
+  tt.classList.remove('visible');
+}
+
+function taskAge(ca){
+  const d=Math.floor((Date.now()-new Date(ca+(ca.endsWith('Z')?'':'Z')))/86400000);
+  if(d===0)return{label:'Bugün',cls:'age-fresh',title:'Bugün eklendi'};
+  if(d===1)return{label:'1g',cls:'age-fresh',title:'1 gün önce'};
+  if(d<=3) return{label:`${d}g`,cls:'age-fresh',title:`${d} gün önce`};
+  if(d<=6) return{label:`${d}g`,cls:'age-warn',title:`${d} gün önce`};
+  if(d<=13)return{label:`${d}g`,cls:'age-old',title:`${d} gün önce`};
+  return{label:`${Math.floor(d/7)}h+`,cls:'age-stale',title:`${d} gün önce`};
+}
+
+
+function onOver(e,s){e.preventDefault();document.getElementById(`body-${s}`).classList.add('over');}
+function onLeave(e){e.currentTarget.classList.remove('over');}
+async function onDrop(e,s){e.preventDefault();e.currentTarget.classList.remove('over');if(dragId)await moveTo(dragId,s);}
+
+async function moveTo(id,status){
+  await api.patch(id,{status});
+  const t=allTasks.find(x=>x.id===id);
+  if(t)t.status=status;
+  renderAll();
+  toast(status==='done'?'✅ Tamamlandı':status==='in_progress'?'🔄 Başlandı':'↩ Geri alındı');
+}
+
+async function delTask(id){
+  if(!confirm('Görevi silmek istiyor musun?'))return;
+  await api.del(id);
+  allTasks=allTasks.filter(t=>t.id!==id);
+  renderAll(); toast('🗑 Silindi');
+}
+
+async function copyPrompt(id){
+  const t=allTasks.find(x=>x.id===id); if(!t)return;
+  const desc=t.description.replace(/"/g,"'").replace(/\n/g,' ');
+
+  // planCache undefined ise henüz yüklenmemiş — canlı çek
+  let plan = planCache[id];
+  if (plan === undefined) {
+    plan = await api.get(`/api/tasks/${encodeURIComponent(id)}/plan`);
+    planCache[id] = plan || false;
+  }
+
+  // resimleri yükle
+  if (!imageCache[id]) imageCache[id] = await api.get(`/api/tasks/${encodeURIComponent(id)}/images`);
+  const images = imageCache[id] || [];
+  const imageLines = images.length
+    ? [``, `Görev Görselleri (${images.length} adet):`, ...images.map(img=>`  - http://localhost:3737/uploads/${img.filename}`)]
+    : [];
+
+  const planLines = plan
+    ? [``, `Görev Planı:`, plan.content.replace(/"/g,"'")]
+    : [];
+  const p=[
+    `Modül: ${t.module}`,``,
+    `İLK ADIM — Kanban durumunu güncelle (sessizce):`,
+    `curl -s -X PATCH http://localhost:3737/api/tasks/${encodeURIComponent(t.id)} -H "Content-Type: application/json" -d '{"status":"in_progress"}'`,``,
+    `Ardından şu adımları izle:`,
+    `1. aspnet-core/src/plugins/${t.module}/CONTEXT.md dosyasını oku (yoksa README.md, o da yoksa docs/progress.md).`,
+    `2. aspnet-core/src/plugins/${t.module}/docs/features/yapilacaklar.md dosyasını oku.`,
+    `3. Bağlamı kavradıktan sonra aşağıdaki göreve odaklan:`,``,
+    `Görev: ${t.task_no}`,`${desc}`,
+    ...imageLines,
+    ...planLines,``,
+    `Geliştirmeye başlamadan önce görevi netleştir, tasarım kararı gerekiyorsa sor.`,
+  ].join('\n');
+  navigator.clipboard.writeText(p)
+    .then(()=>toast(plan ? '✦ Prompt kopyalandı (plan dahil)' : '✦ Prompt kopyalandı'))
+    .catch(()=>window.prompt('Kopyala (Ctrl+A, Ctrl+C):', p));
+}
+
+async function triggerSync(){
+  const svg=document.querySelector('#syncBtn svg');
+  svg.classList.add('spinning'); document.getElementById('syncBtn').disabled=true;
+  const r=await api.post('/api/sync',{});
+  svg.classList.remove('spinning'); document.getElementById('syncBtn').disabled=false;
+  await loadTasks(); await loadModules();
+  setTs(new Date().toISOString());
+  toast(`✅ Sync — ${r.added} yeni`);
+}
+
+function setTs(iso){
+  document.getElementById('syncTs').textContent=
+    new Date(iso).toLocaleTimeString('tr',{hour:'2-digit',minute:'2-digit'});
+}
+
+let _tt;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('show'),2600);
+}
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ── PLAN MODAL ────────────────────────────────────────────
+let pmTaskId = null;
+
+async function openPlanModal(id) {
+  pmTaskId = id;
+  const t = allTasks.find(x => x.id === id);
+  if (!t) return;
+  const color = MOD_COLORS[t.module] || '#6366f1';
+
+  document.getElementById('pmTitle').textContent = `${t.task_no} — ${t.module}`;
+  document.getElementById('pmMeta').innerHTML =
+    `<span class="mod-tag" style="--mod-color:${color}">${t.module}</span>`;
+
+  document.getElementById('pmBody').innerHTML =
+    `<div style="color:var(--text-3);font-size:12px;text-align:center;padding:24px 0">Yükleniyor…</div>`;
+  document.getElementById('pmFoot').innerHTML = '';
+  document.getElementById('planOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  let plan = planCache[id];
+  if (plan === undefined) {
+    plan = await api.get(`/api/tasks/${encodeURIComponent(id)}/plan`);
+    planCache[id] = plan || false;
+  }
+
+  renderPlanView(plan);
+}
+
+function renderPlanView(plan) {
+  const body = document.getElementById('pmBody');
+  const foot = document.getElementById('pmFoot');
+
+  if (plan) {
+    const created = new Date(plan.created_at + (plan.created_at.endsWith('Z') ? '' : 'Z'))
+      .toLocaleString('tr', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    const updated = new Date(plan.updated_at + (plan.updated_at.endsWith('Z') ? '' : 'Z'))
+      .toLocaleString('tr', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+    body.innerHTML = `
+      <div class="plan-view">
+        <div class="plan-content-box" id="planContentBox">${esc(plan.content)}</div>
+        <div class="plan-dates">
+          <span>Oluşturuldu: ${created}</span>
+          <span>Güncellendi: ${updated}</span>
+        </div>
+      </div>`;
+
+    foot.innerHTML = `
+      <button class="btn-secondary" onclick="renderPlanEdit()">✏️ Düzenle</button>
+      <button class="btn-secondary" onclick="copyPlanContent()" id="btnCopyPlan">📋 Kopyala</button>
+      <div class="modal-foot-spacer"></div>
+      <button class="btn-danger" onclick="deletePlan()">Planı Sil</button>
+      <button class="btn-primary" onclick="closePlanModal()">Kapat</button>`;
+  } else {
+    body.innerHTML = `
+      <div class="plan-edit">
+        <div style="font-size:12.5px;color:var(--text-3);line-height:1.6">
+          Bu görev için henüz bir plan oluşturulmamış. Aşağıya planı yapıştır veya yaz.
+        </div>
+        <textarea class="plan-textarea" id="planTextarea"
+          placeholder="Görev planını buraya yaz — adımlar, tasarım kararları, notlar…"></textarea>
+        <div class="plan-hint">💡 Claude ile oluşturduğun planı buraya yapıştırabilirsin.</div>
+      </div>`;
+
+    foot.innerHTML = `
+      <button class="btn-secondary" onclick="closePlanModal()">İptal</button>
+      <div class="modal-foot-spacer"></div>
+      <button class="btn-primary" id="pmSaveBtn" onclick="savePlan()">💾 Kaydet</button>`;
+  }
+}
+
+function renderPlanEdit() {
+  const plan = planCache[pmTaskId];
+  const body = document.getElementById('pmBody');
+  const foot = document.getElementById('pmFoot');
+
+  body.innerHTML = `
+    <div class="plan-edit">
+      <textarea class="plan-textarea" id="planTextarea"
+        placeholder="Görev planını buraya yaz…">${plan ? esc(plan.content) : ''}</textarea>
+      <div class="plan-hint">💡 Değişiklikleri kaydetmek için Kaydet butonuna bas.</div>
+    </div>`;
+
+  foot.innerHTML = `
+    <button class="btn-secondary" onclick="renderPlanView(planCache[pmTaskId])">İptal</button>
+    <div class="modal-foot-spacer"></div>
+    <button class="btn-primary" id="pmSaveBtn" onclick="savePlan()">💾 Kaydet</button>`;
+
+  document.getElementById('planTextarea').focus();
+}
+
+async function savePlan() {
+  const content = (document.getElementById('planTextarea')?.value || '').trim();
+  if (!content) { toast('⚠️ Plan boş olamaz'); return; }
+
+  const btn = document.getElementById('pmSaveBtn');
+  btn.disabled = true; btn.textContent = 'Kaydediliyor…';
+
+  const result = await fetch(`/api/tasks/${encodeURIComponent(pmTaskId)}/plan`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content })
+  }).then(r => r.json());
+
+  planCache[pmTaskId] = result;
+  renderPlanView(result);
+  renderAll();
+  toast('✅ Plan kaydedildi');
+}
+
+async function generatePlan(taskId) {
+  generatingPlans.add(taskId);
+  const task = allTasks.find(t=>t.id===taskId);
+  if (task) { const el = document.querySelector(`.card[data-id="${taskId}"]`); if (el) el.replaceWith(makeCard(task)); }
+  const res = await fetch(`/api/tasks/${encodeURIComponent(taskId)}/plan/generate`, { method: 'POST' });
+  if (!res.ok) {
+    generatingPlans.delete(taskId);
+    toast('❌ Plan oluşturma başlatılamadı — agent çalışıyor mu?');
+    if (task) { const el = document.querySelector(`.card[data-id="${taskId}"]`); if (el) el.replaceWith(makeCard(task)); }
+  }
+}
+
+// ── IMAGE FUNCTIONS ────────────────────────────────────────
+function openLightbox(src) {
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+
+function triggerImageUpload(taskId) {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*'; inp.multiple = true;
+  inp.onchange = () => uploadImages(taskId, inp.files);
+  inp.click();
+}
+
+function handleImageDrop(e, taskId) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  uploadImages(taskId, e.dataTransfer.files);
+}
+
+async function uploadImages(taskId, files) {
+  for (const file of files) {
+    if (!file.type.startsWith('image/')) continue;
+    const fd = new FormData();
+    fd.append('image', file);
+    await fetch(`/api/tasks/${encodeURIComponent(taskId)}/images`, { method: 'POST', body: fd });
+  }
+  // server socket event ile imageCache + kart güncellenir
+}
+
+async function deleteImage(taskId, imageId) {
+  await fetch(`/api/tasks/${encodeURIComponent(taskId)}/images/${imageId}`, { method: 'DELETE' });
+}
+
+function copyPlanContent() {
+  const plan = planCache[pmTaskId];
+  if (!plan) return;
+  navigator.clipboard.writeText(plan.content).then(() => {
+    const btn = document.getElementById('btnCopyPlan');
+    if (btn) { btn.textContent = '✅ Kopyalandı'; setTimeout(() => btn.textContent = '📋 Kopyala', 1800); }
+  });
+}
+
+async function deletePlan() {
+  if (!confirm('Planı silmek istiyor musun?')) return;
+  await fetch(`/api/tasks/${encodeURIComponent(pmTaskId)}/plan`, { method: 'DELETE' });
+  planCache[pmTaskId] = false;
+  renderPlanView(null);
+  renderAll();
+  toast('🗑 Plan silindi');
+}
+
+function closePlanModal(e) {
+  if (e && e.target !== document.getElementById('planOverlay')) return;
+  document.getElementById('planOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  pmTaskId = null;
+}
+
+// ESC ile kapat
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePlanModal();
+});
+
+// Görev yüklenince planları toplu çek (cache için)
+async function prefetchPlans(tasks) {
+  const ids = tasks.map(t => t.id).filter(id => planCache[id] === undefined);
+  await Promise.all(ids.map(async id => {
+    const plan = await api.get(`/api/tasks/${encodeURIComponent(id)}/plan`);
+    planCache[id] = plan || false;
+  }));
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+FROM node:20-alpine
+
+# Claude CLI için gerekli araçlar
+RUN apk add --no-cache git
+
+WORKDIR /app
+
+# Önce bağımlılıkları kur (layer cache için)
+COPY package.json ./
+RUN npm install --production
+
+# Claude CLI'ı global kur
+RUN npm install -g @anthropic-ai/claude-code
+
+COPY plan-agent.js ./
+
+CMD ["node", "plan-agent.js"]
