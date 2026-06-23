@@ -265,14 +265,25 @@ app.patch("/api/tasks/:id", (req, res) => {
 
 // POST /api/tasks — manuel görev ekle
 app.post("/api/tasks", (req, res) => {
-  const { module, taskNo, title, description } = req.body;
+  const { module, taskNo, title, description, autoPlan } = req.body;
   if (!module || !taskNo || !description) return res.status(400).json({ error: "module, taskNo, description zorunlu" });
-  const id = makeId(module, taskNo + "_" + Date.now());
+
+  const id = makeId(module, taskNo);
+  const existing = db.prepare("SELECT id FROM tasks WHERE id = ?").get(id);
+  if (existing) return res.status(409).json({ error: "Bu görev zaten mevcut", id });
+
   db.prepare(`
     INSERT INTO tasks (id, module, task_no, title, description, status)
     VALUES (?, ?, ?, ?, ?, 'todo')
   `).run(id, module, taskNo, title || `${module} — ${taskNo}`, description);
-  res.status(201).json(db.prepare("SELECT * FROM tasks WHERE id = ?").get(id));
+
+  const created = db.prepare("SELECT * FROM tasks WHERE id = ?").get(id);
+  io.emit("task:updated", created);
+
+  // Plan otomatik üretimi: autoPlan=false ile devre dışı bırakılabilir
+  if (autoPlan !== false) emitPlanGenerate(created);
+
+  res.status(201).json(created);
 });
 
 // DELETE /api/tasks/:id
