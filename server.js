@@ -176,10 +176,7 @@ async function syncFromMd() {
         // MD'de [x] ama DB'de todo → done yap (in_progress'e dokunma)
         markDoneStmt.run(id);
         updated++;
-      } else if (!t.mdDone && existing.status === 'done') {
-        // MD'de [ ] ama DB'de done → todo'ya geri al (el ile geri alındı)
-        db.prepare(`UPDATE tasks SET status = 'todo', updated_at = datetime('now') WHERE id = ?`).run(id);
-        updated++;
+      // MD'de [ ] ama DB'de done → artık geri alma; DB master kabul edilir
       }
       total++;
     }
