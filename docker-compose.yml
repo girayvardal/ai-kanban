@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   kanban:
     build: .
@@ -9,11 +7,11 @@ services:
       - "3737:3737"
     volumes:
       # MD dosyaları buradan okunur — HRAlyze proje klasörünü bağla
-      - /home/giray/IKSAP Projects/HRAlyze/aspnet-core/src/plugins:/data/plugins:ro
+      - ${PLUGINS_DIR}:/data/plugins:ro
       # SQLite DB kalıcı olarak saklanır — host klasörüne bind mount
-      - /home/giray/IKSAP Projects/Kanban/db:/db
+      - ${DB_DIR}:/db
       # Frontend — build almadan anlık değişiklik
-      - /home/giray/IKSAP Projects/Kanban/public:/app/public:ro
+      - ${PUBLIC_DIR}:/app/public:ro
     environment:
       PORT: 3737
       DB_PATH: /db/kanban.db
@@ -30,7 +28,7 @@ services:
       - kanban
     volumes:
       # Claude CLI credentials — host'ta zaten authenticated
-      - /home/giray/.claude:/root/.claude:ro
+      - ${CLAUDE_DIR}:/root/.claude:ro
     environment:
       KANBAN_URL: http://kanban:3737
 
